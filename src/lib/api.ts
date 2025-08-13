@@ -31,13 +31,47 @@ class ApiClient {
     return this.request("/api/channels");
   }
 
-  async getViewerChannels() {
-    return this.request("/viewer/channels");
+  // HARDCODED RESPONSES FOR TESTING - VIEWER ENDPOINTS
+  async getViewerChannels(): Promise<{channels: string[], total: number}> {
+    // Hardcoded response for testing purposes
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          "channels": [
+            "ch001",
+            "ch002",
+            "ch003",
+            "ch004"
+          ],
+          "total": 4
+        });
+      }, 500); // Simulate network delay
+    });
   }
 
-  async getViewerChannel(channelId: string) {
-    return this.request(`/viewer/channels/${channelId}`);
+  async getViewerChannel(channelId: string): Promise<{
+    channel_id: string;
+    hls_url: string;
+    media_url: string;
+    title: string;
+    description: string;
+    status: string;
+  }> {
+    // Hardcoded response for testing purposes
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          "channel_id": channelId,
+          "hls_url": `/viewer/hls/${channelId}/playlist.m3u8`,
+          "media_url": "http://34.63.72.90/viewer/18003/stream.m3u8",
+          "title": `Channel ${channelId.replace('ch', '')} - News`,
+          "description": "24/7 News Channel",
+          "status": "live"
+        });
+      }, 300); // Simulate network delay
+    });
   }
+  // END HARDCODED RESPONSES
 
   async getSessionDetails(sessionId: string) {
     return this.request(`/api/sessions/${sessionId}`);

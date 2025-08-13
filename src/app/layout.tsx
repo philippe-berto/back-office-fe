@@ -14,8 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tunity Back Office",
-  description: "Back office system for managing streaming resources",
+  title: "Tunity Back Office - Streaming Management Platform",
+  description: "Back office system for managing Tunity's streaming resources and live channels",
+  keywords: "tunity, streaming, live video, back office, management, dashboard",
+  authors: [{ name: "Tunity" }],
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
