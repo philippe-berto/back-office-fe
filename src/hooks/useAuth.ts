@@ -25,18 +25,24 @@ export function useAuth() {
 
   const validateToken = async (token: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/validate`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id_token: token }),
+      console.log("Skipping token validation - using fake user data for testing...");
+      
+      // FAKE USER DATA FOR TESTING - SKIP API VALIDATION
+      const fakeUserData = {
+        success: true,
+        user: {
+          id: "test-user-123",
+          email: "test@tunity.com",
+          name: "Test User",
+          picture: "https://via.placeholder.com/40/4F7DF8/FFFFFF?text=TU",
+          roles: ["admin", "qa", "developer", "viewer"]
         }
-      );
+      };
 
-      const data = await response.json();
-      if (data.success) {
-        setUser(data.user);
+      console.log("Using fake user data:", fakeUserData);
+      
+      if (fakeUserData.success) {
+        setUser(fakeUserData.user);
       } else {
         localStorage.removeItem("google_token");
       }

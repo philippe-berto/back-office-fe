@@ -3,13 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Tunity brand colors */
+  --tunity-blue: #4F7DF8;
+  --tunity-blue-dark: #3B5FD6;
+  --tunity-blue-light: #6B93FF;
+  --tunity-gradient-start: #4F7DF8;
+  --tunity-gradient-end: #7B9BFF;
+  --tunity-dark: #1A1A1A;
+  --tunity-gray: #F8F9FA;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +23,32 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Tunity gradient background */
+.tunity-gradient {
+  background: linear-gradient(135deg, var(--tunity-gradient-start) 0%, var(--tunity-gradient-end) 100%);
+}
+
+.tunity-gradient-dark {
+  background: linear-gradient(135deg, var(--tunity-dark) 0%, var(--tunity-blue-dark) 100%);
+}
+
+.tunity-blue {
+  color: var(--tunity-blue);
+}
+
+.bg-tunity-blue {
+  background-color: var(--tunity-blue);
+}
+
+.bg-tunity-blue-dark {
+  background-color: var(--tunity-blue-dark);
+}
+
+.bg-tunity-gray {
+  background-color: var(--tunity-gray);
 }
 
 /* Custom styles for video player sliders */
