@@ -19,6 +19,7 @@ export default function HLSVideoPlayer({ src, autoPlay = false }: VideoPlayerPro
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   useEffect(() => {
     if (!videoRef.current || !src) return;
@@ -27,12 +28,18 @@ export default function HLSVideoPlayer({ src, autoPlay = false }: VideoPlayerPro
     console.log("HLS Player: Loading source:", src);
     setIsLoading(true);
     setHasError(false);
+    setErrorMessage("");
 
     if (Hls.isSupported()) {
       console.log("HLS Player: HLS.js is supported");
       const hls = new Hls({
         debug: true,
-        enableWorker: false
+        enableWorker: false,
+        xhrSetup: function(xhr, url) {
+          console.log("HLS Player: Setting up XHR for:", url);
+          // Try to handle CORS
+          xhr.withCredentials = false;
+        }
       });
       hlsRef.current = hls;
       
@@ -52,12 +59,33 @@ export default function HLSVideoPlayer({ src, autoPlay = false }: VideoPlayerPro
       hls.on(Hls.Events.ERROR, (event, data) => {
         console.error("HLS Player: Error occurred:", data);
         setIsLoading(false);
+        
+        let errorMsg = "An error occurred while loading the video";
+        
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+          if (data.details === Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+            errorMsg = "Failed to load video manifest. This might be a CORS issue.";
+            console.error("HLS Player: Manifest load error - likely CORS issue");
+          } else if (data.details === Hls.ErrorDetails.FRAG_LOAD_ERROR) {
+            errorMsg = "Failed to load video fragment. Check network connectivity.";
+          } else {
+            errorMsg = "Network error occurred while loading video";
+          }
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          errorMsg = "Media decoding error occurred";
+        }
+        
+        setErrorMessage(errorMsg);
+        
         if (data.fatal) {
           setHasError(true);
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.log("HLS Player: Fatal network error encountered, trying to recover");
-              hls.startLoad();
+              // Don't automatically retry on CORS errors
+              if (data.details !== Hls.ErrorDetails.MANIFEST_LOAD_ERROR) {
+                hls.startLoad();
+              }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               console.log("HLS Player: Fatal media error encountered, trying to recover");
@@ -93,11 +121,13 @@ export default function HLSVideoPlayer({ src, autoPlay = false }: VideoPlayerPro
         console.error("HLS Player: Video error (Safari):", e);
         setIsLoading(false);
         setHasError(true);
+        setErrorMessage("Failed to load video. This might be a CORS issue or unsupported format.");
       });
     } else {
       console.error("HLS Player: HLS is not supported in this browser");
       setIsLoading(false);
       setHasError(true);
+      setErrorMessage("HLS playback is not supported in this browser");
     }
 
     return () => {
@@ -304,12 +334,22 @@ export default function HLSVideoPlayer({ src, autoPlay = false }: VideoPlayerPro
       {/* Error State */}
       {src && hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-          <div className="text-center">
+          <div className="text-center max-w-md px-4">
             <svg className="mx-auto h-12 w-12 text-red-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.824-.833-2.598 0L3.268 16.5c-.77.833.192 2.5 1.732 2.5z" />
             </svg>
-            <p className="text-white">Failed to load stream</p>
-            <p className="text-gray-400 text-sm">Check console for details</p>
+            <p className="text-white mb-2">Failed to load stream</p>
+            <p className="text-gray-400 text-sm mb-3">{errorMessage || "Check console for details"}</p>
+            {errorMessage.includes("CORS") && (
+              <div className="text-yellow-400 text-xs">
+                <p>💡 CORS Fix Suggestions:</p>
+                <ul className="text-left mt-1 space-y-1">
+                  <li>• Configure server to send proper CORS headers</li>
+                  <li>• Serve the video from the same domain</li>
+                  <li>• Contact backend team to add your domain to allowed origins</li>
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       )}

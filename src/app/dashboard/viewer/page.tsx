@@ -65,6 +65,24 @@ export default function ViewerPage() {
     }
   };
 
+  const getStreamUrl = (channelData: Channel) => {
+    // Prioritize media_url if available (external working stream)
+    if (channelData.media_url) {
+      return channelData.media_url;
+    }
+    
+    // Fallback to hls_url if no media_url
+    if (!channelData.hls_url) return "";
+    
+    // If it's a relative URL, make it absolute with the API base URL
+    let streamUrl = channelData.hls_url;
+    if (streamUrl.startsWith('/')) {
+      streamUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${streamUrl}`;
+    }
+    
+    return streamUrl;
+  };
+
   return (
     <ProtectedRoute>
       <DashboardLayout>
@@ -165,27 +183,27 @@ export default function ViewerPage() {
           </div>
 
           {/* Video Player */}
-          {channelData && channelData.hls_url && (
+          {channelData && (channelData.hls_url || channelData.media_url) && (
             <div className="bg-white shadow rounded-lg p-6">
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 Live Stream: {channelData.title}
               </h2>
-              {/* Use media_url as fallback or absolute URL construction */}
+              <div className="mb-2 text-sm text-gray-600">
+                Stream URL: {getStreamUrl(channelData)}
+              </div>
               <HLSVideoPlayer 
-                src={channelData.media_url || (channelData.hls_url.startsWith('http') 
-                  ? channelData.hls_url 
-                  : `${process.env.NEXT_PUBLIC_API_BASE_URL}${channelData.hls_url}`
-                )} 
+                src={getStreamUrl(channelData)} 
                 autoPlay={true} 
               />
               {/* Debug info */}
               <div className="mt-4 p-3 bg-gray-50 rounded text-xs">
-                <p><strong>HLS URL:</strong> {channelData.hls_url}</p>
-                <p><strong>Media URL:</strong> {channelData.media_url}</p>
-                <p><strong>Using:</strong> {channelData.media_url || (channelData.hls_url.startsWith('http') 
-                  ? channelData.hls_url 
-                  : `${process.env.NEXT_PUBLIC_API_BASE_URL}${channelData.hls_url}`
-                )}</p>
+                <p><strong>HLS URL:</strong> {channelData.hls_url || "Not provided"}</p>
+                <p><strong>Media URL:</strong> {channelData.media_url || "Not provided"}</p>
+                <p><strong>Final URL:</strong> {getStreamUrl(channelData)}</p>
+                <p><strong>Using:</strong> {channelData.media_url ? "media_url (preferred)" : "hls_url"}</p>
+                {!channelData.media_url && channelData.hls_url && (
+                  <p className="text-amber-600 mt-1">⚠️ Note: media_url not provided, using hls_url which may not exist on server</p>
+                )}
               </div>
             </div>
           )}
