@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tunity Back Office Frontend
 
-## Getting Started
+A React/Next.js frontend for the Tunity Back Office system with Google OAuth2 authentication and role-based access control.
 
-First, run the development server:
+## Features
+
+- **Google OAuth2 Authentication**: Secure login with Google accounts
+- **Role-based Access Control**: Different permissions for admin, qa, developer, and viewer roles
+- **Dashboard**: Overview of user information and quick access to features
+- **Channels Management**: View and manage streaming channel configurations (admin, developer)
+- **Sessions Management**: View streaming sessions and their details (admin, qa, developer)
+- **Redis Debugging**: QA tool for fetching Redis data by key (admin, qa)
+- **Responsive Design**: Built with Tailwind CSS for mobile and desktop
+
+## Setup
+
+### Prerequisites
+
+- Node.js 18+ and npm
+- Google Cloud Platform account with OAuth2 setup
+- Backend API running on port 8080
+
+### 1. Environment Configuration
+
+Copy the `.env.local` file and update with your Google OAuth2 credentials:
+
+```bash
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+```
+
+### 2. Google OAuth2 Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Navigate to **APIs & Services → Credentials**
+3. Create OAuth 2.0 Client ID (Web application)
+4. Add authorized origins:
+   - `http://localhost:3000` (development)
+   - `https://your-domain.com` (production)
+5. Configure OAuth consent screen as "Internal" for company domain
+6. Required scopes: `email`, `profile`, `openid`
+
+### 3. Install Dependencies
+
+```bash
+npm install
+```
+
+### 4. Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## User Roles & Permissions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **admin**: Full access to all resources
+- **qa**: Access to sessions, videos, and Redis data debugging
+- **developer**: Access to channels and sessions
+- **viewer**: Read-only access to basic resources
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Next.js app router pages
+│   ├── dashboard/         # Protected dashboard pages
+│   ├── login/            # Login page
+│   └── layout.tsx        # Root layout with OAuth provider
+├── components/           # Reusable components
+│   ├── DashboardLayout.tsx
+│   ├── LoginButton.tsx
+│   └── ProtectedRoute.tsx
+├── hooks/               # Custom React hooks
+│   └── useAuth.ts       # Authentication hook
+└── lib/                 # Utilities and API client
+    └── api.ts           # API client with authentication
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Integration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The frontend communicates with the backend through the following endpoints:
 
-## Deploy on Vercel
+- `POST /api/auth/validate` - Validate Google JWT token
+- `GET /api/channels` - Get channel configurations
+- `GET /api/sessions` - Get session list
+- `GET /api/sessions/:id` - Get session details
+- `GET /api/sessions/:id/videos` - Get session videos
+- `GET /api/redis/:key` - Fetch Redis data for debugging
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Build and Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Security
+
+- JWT tokens are stored in localStorage
+- Domain restrictions enforce company email addresses only
+- Role-based route protection prevents unauthorized access
+- Automatic token validation and refresh handling
