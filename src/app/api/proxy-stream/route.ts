@@ -23,8 +23,41 @@ export async function GET(request: NextRequest) {
 
     // Get the content type from the original response
     const contentType = response.headers.get('content-type') || 'application/vnd.apple.mpegurl';
+    
+    // If it's an HLS manifest (.m3u8), we need to rewrite relative URLs
+    if (contentType.includes('application/vnd.apple.mpegurl') || mediaUrl.endsWith('.m3u8')) {
+      const manifestText = await response.text();
+      
+      // Get base URL for the manifest
+      const baseUrl = mediaUrl.substring(0, mediaUrl.lastIndexOf('/') + 1);
+      
+      // Rewrite relative URLs to use our proxy
+      const rewrittenManifest = manifestText.split('\n').map(line => {
+        // Skip comment lines and empty lines
+        if (line.startsWith('#') || line.trim() === '') {
+          return line;
+        }
+        
+        // If it's a relative URL (doesn't start with http), rewrite it
+        if (!line.startsWith('http')) {
+          const fullUrl = baseUrl + line.trim();
+          return `/api/proxy-stream?url=${encodeURIComponent(fullUrl)}`;
+        }
+        
+        return line;
+      }).join('\n');
+      
+      return new NextResponse(rewrittenManifest, {
+        status: 200,
+        headers: {
+          'Content-Type': contentType,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache',
+        },
+      });
+    }
 
-    // Stream the response back
+    // For non-manifest files (like .ts chunks), just stream them
     return new NextResponse(response.body, {
       status: 200,
       headers: {
