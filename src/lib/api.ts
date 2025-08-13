@@ -31,6 +31,22 @@ class ApiClient {
     return this.request("/api/channels");
   }
 
+  // Dashboard stats methods
+  async getDashboardStats(): Promise<{
+    onlineChannels: number;
+    sessionsLastHour: number;
+  }> {
+    return this.request("/api/dashboard/stats");
+  }
+
+  async getOnlineChannelsCount(): Promise<{ count: number }> {
+    return this.request("/api/channels/online/count");
+  }
+
+  async getSessionsLastHour(): Promise<{ count: number }> {
+    return this.request("/api/sessions/last-hour/count");
+  }
+
   // HARDCODED RESPONSES FOR TESTING - VIEWER ENDPOINTS
   async getViewerChannels(): Promise<{channels: string[], total: number}> {
     // Hardcoded response for testing purposes

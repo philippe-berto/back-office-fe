@@ -2,15 +2,60 @@
 
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DashboardLayout from "@/components/DashboardLayout";
+import QuickActionCard from "@/components/QuickActionCard";
+import { TvIcon, ChannelsIcon, SessionsIcon, RedisIcon } from "@/components/icons";
 import { useAuth } from "@/hooks/useAuth";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { QuickAction } from "@/types/dashboard";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { stats } = useDashboardStats(30000); // Refresh every 30 seconds
+
+  const quickActions: QuickAction[] = [
+    {
+      name: "Viewer",
+      description: "Watch live streams",
+      href: "/dashboard/viewer",
+      icon: <TvIcon />,
+      color: "from-purple-400 to-purple-600",
+      roles: null
+    },
+    {
+      name: "Channels", 
+      description: "Manage streaming channels",
+      href: "/dashboard/channels",
+      icon: <ChannelsIcon />,
+      color: "from-blue-400 to-blue-600",
+      roles: ["admin", "developer"]
+    },
+    {
+      name: "Sessions",
+      description: "View session details", 
+      href: "/dashboard/sessions",
+      icon: <SessionsIcon />,
+      color: "from-green-400 to-green-600",
+      roles: ["admin", "qa", "developer"]
+    },
+    {
+      name: "Redis Data",
+      description: "QA debugging tools",
+      href: "/dashboard/redis", 
+      icon: <RedisIcon />,
+      color: "from-red-400 to-red-600",
+      roles: ["admin", "qa"]
+    }
+  ];
+
+  const filteredActions = quickActions.filter((action) => {
+    if (!action.roles) return true;
+    return user?.roles.some((role) => action.roles!.includes(role));
+  });
 
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="mt-2 text-sm text-gray-600">
@@ -18,109 +63,89 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {user && (
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  User Information
-                </h3>
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Name</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user.name}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Email</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user.email}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">User ID</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user.id}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Roles</dt>
-                    <dd className="mt-1">
-                      {user.roles.map((role) => (
-                        <span
-                          key={role}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2"
-                        >
-                          {role}
-                        </span>
-                      ))}
-                    </dd>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Quick access cards */}
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200">
+              <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">Ch</span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl"><ChannelsIcon /></span>
                     </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Channels
+                        Online Channels
                       </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        Manage streaming channels
+                      <dd className="flex items-baseline">
+                        {stats.loading ? (
+                          <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+                        ) : stats.error ? (
+                          <span className="text-red-500 text-sm">Error</span>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{stats.onlineChannels}</span>
+                        )}
                       </dd>
                     </dl>
                   </div>
                 </div>
               </div>
+              <div className="bg-gray-50 px-6 py-3">
+                <div className="text-sm text-gray-500">
+                  Currently broadcasting live
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
+            <div className="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200">
+              <div className="p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">Se</span>
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl"><SessionsIcon /></span>
                     </div>
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
-                        Sessions
+                        Sessions (Last Hour)
                       </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        View session details
+                      <dd className="flex items-baseline">
+                        {stats.loading ? (
+                          <div className="animate-pulse h-8 w-16 bg-gray-200 rounded"></div>
+                        ) : stats.error ? (
+                          <span className="text-red-500 text-sm">Error</span>
+                        ) : (
+                          <span className="text-3xl font-bold text-gray-900">{stats.sessionsLastHour}</span>
+                        )}
                       </dd>
                     </dl>
                   </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-6 py-3">
+                <div className="text-sm text-gray-500">
+                  Active in the past 60 minutes
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-red-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">Re</span>
-                    </div>
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Redis Data
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        QA debugging tools
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {filteredActions.map((action) => (
+                <QuickActionCard
+                  key={action.name}
+                  name={action.name}
+                  description={action.description}
+                  href={action.href}
+                  icon={action.icon}
+                  color={action.color}
+                />
+              ))}
             </div>
           </div>
         </div>
