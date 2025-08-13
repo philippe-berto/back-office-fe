@@ -63,7 +63,7 @@ class ApiClient {
         resolve({
           "channel_id": channelId,
           "hls_url": `/viewer/hls/${channelId}/playlist.m3u8`,
-          "media_url": "http://34.63.72.90/viewer/18003/stream.m3u8",
+          "media_url": "https://34.63.72.90/viewer/18003/stream.m3u8",
           "title": `Channel ${channelId.replace('ch', '')} - News`,
           "description": "24/7 News Channel",
           "status": "live"
