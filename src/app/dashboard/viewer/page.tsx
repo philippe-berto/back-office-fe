@@ -68,6 +68,13 @@ export default function ViewerPage() {
   const getStreamUrl = (channelData: Channel) => {
     // Prioritize media_url if available (external working stream)
     if (channelData.media_url) {
+      // Check if it's HTTP and we're on HTTPS (mixed content)
+      if (channelData.media_url.startsWith('http://') && 
+          typeof window !== 'undefined' && 
+          window.location.protocol === 'https:') {
+        // Use proxy to avoid mixed content issues
+        return `/api/proxy-stream?url=${encodeURIComponent(channelData.media_url)}`;
+      }
       return channelData.media_url;
     }
     
@@ -78,6 +85,14 @@ export default function ViewerPage() {
     let streamUrl = channelData.hls_url;
     if (streamUrl.startsWith('/')) {
       streamUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${streamUrl}`;
+    }
+    
+    // Check if it's HTTP and we're on HTTPS (mixed content)
+    if (streamUrl.startsWith('http://') && 
+        typeof window !== 'undefined' && 
+        window.location.protocol === 'https:') {
+      // Use proxy to avoid mixed content issues
+      return `/api/proxy-stream?url=${encodeURIComponent(streamUrl)}`;
     }
     
     return streamUrl;
