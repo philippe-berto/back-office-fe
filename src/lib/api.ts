@@ -227,24 +227,6 @@ class ApiClient {
     return response.json();
   }
 
-  async getSessions() {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch("/api/sessions", {
-      headers: {
-        "Content-Type": "application/json",
-        ...this.getAuthHeaders(),
-      },
-    });
-
-    if (response.status === 401) {
-      clearAuth();
-      window.location.href = "/login";
-      return;
-    }
-
-    return response.json();
-  }
-
   async getSessionVideos(sessionId: string) {
     // Use proxy endpoint to avoid mixed content issues
     const response = await fetch(`/api/sessions/${sessionId}/videos`, {
@@ -266,6 +248,42 @@ class ApiClient {
   async getRedisData(key: string) {
     // Use proxy endpoint to avoid mixed content issues
     const response = await fetch(`/api/redis/${key}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
+  }
+
+  async getSessionLogs(sessionId: string) {
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/sessions/${sessionId}/logs`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
+  }
+
+  async getSessionFrames(sessionId: string) {
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/sessions/${sessionId}/frames`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),

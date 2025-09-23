@@ -29,10 +29,10 @@ export default function SessionLookupForm({ onSessionFound, onError, onWarning }
       console.error("Error fetching session:", err);
       
       if (err.message === 'NO_CONTENT') {
-        onWarning(`No content for this session (${sessionId})`);
+        onWarning(`No content for this session. (HTTP 204).`);
       } else if (err.message?.startsWith('HTTP_ERROR_')) {
         const statusCode = err.message.replace('HTTP_ERROR_', '');
-        onError(`Failed to fetch session ${sessionId} (HTTP ${statusCode}). Please check the ID and try again.`);
+        onError(`Failed to fetch session ${sessionId} (HTTP ${statusCode}). Please check the ID or contact the admin.`);
       } else {
         onError(`Failed to fetch session ${sessionId}. Please check the ID and try again.`);
       }
