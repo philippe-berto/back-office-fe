@@ -9,9 +9,10 @@ interface SessionDetailsProps {
 }
 
 interface LogEntry {
-  timestamp: string;
-  severity: string;
-  message: string;
+  Timestamp: string;
+  Level: string;
+  Message: string;
+  SessionID: string;
   [key: string]: any; // Allow for additional log fields
 }
 
@@ -48,7 +49,9 @@ export default function SessionDetails({ sessionData }: SessionDetailsProps) {
     
     try {
       const response = await apiClient.getSessionLogs(session.id.toString());
-      setLogs(response.logs || []);
+      // Handle both array response and object with logs property
+      const logsData = Array.isArray(response) ? response : (response.logs || []);
+      setLogs(logsData);
     } catch (error) {
       console.error("Error fetching logs:", error);
       setLogsError("Failed to fetch logs. Please try again.");
@@ -78,14 +81,17 @@ export default function SessionDetails({ sessionData }: SessionDetailsProps) {
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity?.toLowerCase()) {
+  const getSeverityColor = (level: string) => {
+    switch (level?.toLowerCase()) {
       case 'error':
         return 'text-red-600 bg-red-50';
+      case 'warn':
       case 'warning':
         return 'text-yellow-600 bg-yellow-50';
       case 'info':
         return 'text-blue-600 bg-blue-50';
+      case 'debug':
+        return 'text-gray-600 bg-gray-50';
       default:
         return 'text-gray-600 bg-gray-50';
     }
@@ -280,7 +286,7 @@ export default function SessionDetails({ sessionData }: SessionDetailsProps) {
                         Timestamp
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Severity
+                        Level
                       </th>
                       <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Message
@@ -291,15 +297,15 @@ export default function SessionDetails({ sessionData }: SessionDetailsProps) {
                     {logs.map((log, index) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatTimestamp(log.timestamp)}
+                          {formatTimestamp(log.Timestamp)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(log.severity)}`}>
-                            {log.severity}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityColor(log.Level)}`}>
+                            {log.Level}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900 max-w-md break-words">
-                          {log.message}
+                          {log.Message}
                         </td>
                       </tr>
                     ))}
