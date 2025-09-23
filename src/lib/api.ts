@@ -39,7 +39,8 @@ class ApiClient {
     };
     message?: string;
   }> {
-    return this.request("/auth/validate", {
+    // Use local API route proxy to avoid mixed content issues
+    return this.request("/api/auth/validate", {
       method: "POST",
       body: JSON.stringify({ id_token: token }),
     });
