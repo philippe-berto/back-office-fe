@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
-    const key = params.key;
+    const { key } = await params;
     
     // Get backend URL from environment or use default
     const backendURL = process.env.BACKEND_URL || 'http://34.29.136.15:8080';
