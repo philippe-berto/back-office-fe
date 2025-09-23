@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getGoogleToken, clearAuth } from "@/lib/auth";
+import { apiClient } from "@/lib/api";
 
 interface User {
   id: string;
@@ -15,7 +17,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("google_token");
+    const token = getGoogleToken();
     if (token) {
       validateToken(token);
     } else {
@@ -25,37 +27,39 @@ export function useAuth() {
 
   const validateToken = async (token: string) => {
     try {
-      console.log("Skipping token validation - using fake user data for testing...");
+      console.log("Validating token with backend...");
       
-      // FAKE USER DATA FOR TESTING - SKIP API VALIDATION
-      const fakeUserData = {
-        success: true,
-        user: {
-          id: "test-user-123",
-          email: "test@tunity.com",
-          name: "Test User",
-          picture: "https://via.placeholder.com/40/4F7DF8/FFFFFF?text=TU",
-          roles: ["admin", "qa", "developer", "viewer"]
-        }
-      };
-
-      console.log("Using fake user data:", fakeUserData);
+      // Call backend to validate token and get user data with roles
+      const response = await apiClient.validateGoogleToken(token);
       
-      if (fakeUserData.success) {
-        setUser(fakeUserData.user);
+      if (response.success && response.user) {
+        // Convert backend user data to our User interface format
+        const userWithId: User = {
+          id: response.user.email, // Use email as ID if backend doesn't provide a separate ID
+          email: response.user.email,
+          name: response.user.name,
+          picture: response.user.picture,
+          roles: response.user.roles
+        };
+        
+        // Update stored user data with backend response
+        localStorage.setItem("user_data", JSON.stringify(response.user));
+        setUser(userWithId);
+        console.log("Token validation successful:", userWithId);
       } else {
-        localStorage.removeItem("google_token");
+        console.error("Token validation failed:", response.message);
+        clearAuth();
       }
     } catch (error) {
-      console.error("Token validation failed:", error);
-      localStorage.removeItem("google_token");
+      console.error("Token validation request failed:", error);
+      clearAuth();
     } finally {
       setLoading(false);
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("google_token");
+    clearAuth();
     setUser(null);
     window.location.href = "/login";
   };

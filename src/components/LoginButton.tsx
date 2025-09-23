@@ -3,6 +3,7 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 import TunityLogo from "./TunityLogo";
+import { apiClient } from "@/lib/api";
 
 export default function LoginButton() {
   const router = useRouter();
@@ -17,31 +18,24 @@ export default function LoginButton() {
     }
 
     try {
-      console.log("Skipping API validation - using fake response for testing...");
+      console.log("Validating Google token with backend...");
       
-      // FAKE RESPONSE FOR TESTING - SKIP API VALIDATION
-      const fakeResponse = {
-        success: true,
-        user: {
-          email: "test@tunity.com",
-          name: "Test User",
-          picture: "https://via.placeholder.com/40",
-          roles: ["admin", "qa", "developer", "viewer"]
-        },
-        message: "Authentication successful"
-      };
+      // Call backend to validate token and get user data with roles
+      const response = await apiClient.validateGoogleToken(credentialResponse.credential);
       
-      console.log("Using fake backend response:", fakeResponse);
+      console.log("Backend validation response:", response);
       
-      if (fakeResponse.success) {
-        // Store token for API calls
+      if (response.success && response.user) {
+        // Store token and user data from backend response
         localStorage.setItem("google_token", credentialResponse.credential);
+        localStorage.setItem("user_data", JSON.stringify(response.user));
+        
         console.log("Authentication successful, redirecting to dashboard...");
         // Redirect to dashboard
         router.push("/dashboard");
       } else {
-        console.error("Backend validation failed:", fakeResponse.message);
-        alert(fakeResponse.message || "Authentication failed");
+        console.error("Backend validation failed:", response.message);
+        alert(response.message || "Authentication failed");
       }
     } catch (error) {
       console.error("Authentication request failed:", error);

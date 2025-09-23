@@ -1,8 +1,10 @@
+import { getGoogleToken, clearAuth } from "./auth";
+
 class ApiClient {
   private baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   private getAuthHeaders(): Record<string, string> {
-    const token = localStorage.getItem("google_token");
+    const token = getGoogleToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
@@ -18,12 +20,29 @@ class ApiClient {
 
     if (response.status === 401) {
       // Token expired, redirect to login
-      localStorage.removeItem("google_token");
+      clearAuth();
       window.location.href = "/login";
       return;
     }
 
     return response.json();
+  }
+
+  // Authentication methods
+  async validateGoogleToken(token: string): Promise<{
+    success: boolean;
+    user?: {
+      email: string;
+      name: string;
+      picture: string;
+      roles: string[];
+    };
+    message?: string;
+  }> {
+    return this.request("/auth/validate", {
+      method: "POST",
+      body: JSON.stringify({ id_token: token }),
+    });
   }
 
   // Example API methods
@@ -91,6 +110,34 @@ class ApiClient {
 
   async getSessionDetails(sessionId: string) {
     return this.request(`/api/sessions/${sessionId}`);
+  }
+
+  async getSessionById(sessionId: string) {
+    const response = await fetch(`${this.baseURL}/sessions/${sessionId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      // Token expired, redirect to login
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    if (response.status === 204) {
+      // No content for this session
+      throw new Error('NO_CONTENT');
+    }
+
+    if (response.status >= 400) {
+      // Client or server error
+      throw new Error(`HTTP_ERROR_${response.status}`);
+    }
+
+    return response.json();
   }
 
   async getSessions() {
