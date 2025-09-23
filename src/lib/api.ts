@@ -40,11 +40,7 @@ class ApiClient {
     message?: string;
   }> {
     // Use local Next.js API route proxy to avoid mixed content issues
-    const url = "/api/auth/validate";
-    console.log("Making auth request to:", url);
-    console.log("Current baseURL:", this.baseURL);
-    
-    const response = await fetch(url, {
+    const response = await fetch("/api/auth/validate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,25 +57,77 @@ class ApiClient {
     return response.json();
   }
 
-  // Example API methods
+  // Example API methods - use proxy endpoints to avoid mixed content
   async getChannels() {
-    return this.request("/api/channels");
+    const response = await fetch("/api/channels", {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
   }
 
-  // Dashboard stats methods
+  // Dashboard stats methods - use proxy endpoints to avoid mixed content
   async getDashboardStats(): Promise<{
     onlineChannels: number;
     sessionsLastHour: number;
   }> {
-    return this.request("/api/dashboard/stats");
+    const response = await fetch("/api/dashboard/stats", {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return { onlineChannels: 0, sessionsLastHour: 0 };
+    }
+
+    return response.json();
   }
 
   async getOnlineChannelsCount(): Promise<{ count: number }> {
-    return this.request("/api/channels/online/count");
+    const response = await fetch("/api/channels/online/count", {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return { count: 0 };
+    }
+
+    return response.json();
   }
 
   async getSessionsLastHour(): Promise<{ count: number }> {
-    return this.request("/api/sessions/last-hour/count");
+    const response = await fetch("/api/sessions/last-hour/count", {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return { count: 0 };
+    }
+
+    return response.json();
   }
 
   // HARDCODED RESPONSES FOR TESTING - VIEWER ENDPOINTS
@@ -125,11 +173,34 @@ class ApiClient {
   // END HARDCODED RESPONSES
 
   async getSessionDetails(sessionId: string) {
-    return this.request(`/api/sessions/${sessionId}`);
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/sessions/${sessionId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    if (response.status === 204) {
+      throw new Error('NO_CONTENT');
+    }
+
+    if (response.status >= 400) {
+      throw new Error(`HTTP_ERROR_${response.status}`);
+    }
+
+    return response.json();
   }
 
   async getSessionById(sessionId: string) {
-    const response = await fetch(`${this.baseURL}/sessions/${sessionId}`, {
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/sessions/${sessionId}`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -157,15 +228,57 @@ class ApiClient {
   }
 
   async getSessions() {
-    return this.request("/api/sessions");
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch("/api/sessions", {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
   }
 
   async getSessionVideos(sessionId: string) {
-    return this.request(`/api/sessions/${sessionId}/videos`);
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/sessions/${sessionId}/videos`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
   }
 
   async getRedisData(key: string) {
-    return this.request(`/api/redis/${key}`);
+    // Use proxy endpoint to avoid mixed content issues
+    const response = await fetch(`/api/redis/${key}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeaders(),
+      },
+    });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return;
+    }
+
+    return response.json();
   }
 }
 
