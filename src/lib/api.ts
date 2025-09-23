@@ -28,7 +28,7 @@ class ApiClient {
     return response.json();
   }
 
-  // Authentication methods
+  // Authentication methods - uses local proxy to avoid mixed content
   async validateGoogleToken(token: string): Promise<{
     success: boolean;
     user?: {
@@ -39,11 +39,26 @@ class ApiClient {
     };
     message?: string;
   }> {
-    // Use local API route proxy to avoid mixed content issues
-    return this.request("/api/auth/validate", {
+    // Use local Next.js API route proxy to avoid mixed content issues
+    const url = "/api/auth/validate";
+    console.log("Making auth request to:", url);
+    console.log("Current baseURL:", this.baseURL);
+    
+    const response = await fetch(url, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ id_token: token }),
     });
+
+    if (response.status === 401) {
+      clearAuth();
+      window.location.href = "/login";
+      return { success: false, message: "Unauthorized" };
+    }
+
+    return response.json();
   }
 
   // Example API methods
