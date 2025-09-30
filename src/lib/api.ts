@@ -263,9 +263,21 @@ class ApiClient {
     return response.json();
   }
 
-  async getSessionLogs(sessionId: string) {
+  async getSessionLogs(sessionId: string, startTime: string, endTime?: string) {
     // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/sessions/${sessionId}/logs`, {
+    const url = new URL(`/api/sessions/${sessionId}/logs`, window.location.origin);
+    
+    // If endTime is not provided, set it to one hour after startTime
+    const finalEndTime = endTime || (() => {
+      const start = new Date(startTime);
+      const end = new Date(start.getTime() + 60 * 60 * 1000); // Add 1 hour in milliseconds
+      return end.toISOString();
+    })();
+    
+    url.searchParams.append('start', startTime);
+    url.searchParams.append('end', finalEndTime);
+
+    const response = await fetch(url.toString(), {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),

@@ -48,7 +48,18 @@ export default function SessionDetails({ sessionData }: SessionDetailsProps) {
     setLogsError(null);
     
     try {
-      const response = await apiClient.getSessionLogs(session.id.toString());
+      // Calculate start time as one minute before init_ts
+      const initTime = new Date(session.init_ts);
+      const startTime = new Date(initTime.getTime() - 60 * 1000); // Subtract 1 minute in milliseconds
+      
+      // Convert end_ts to ISO format if it exists
+      const endTime = session.end_ts ? new Date(session.end_ts).toISOString() : undefined;
+      
+      const response = await apiClient.getSessionLogs(
+        session.id.toString(), 
+        startTime.toISOString(), 
+        endTime
+      );
       // Handle both array response and object with logs property
       const logsData = Array.isArray(response) ? response : (response.logs || []);
       setLogs(logsData);
