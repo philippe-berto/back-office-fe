@@ -18,22 +18,7 @@ export default function ChannelsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchChannels();
-  }, []);
 
-  const fetchChannels = async () => {
-    try {
-      setLoading(true);
-      const data = await apiClient.getChannels();
-      setChannels(data.channels || []);
-    } catch (err) {
-      setError("Failed to fetch channels");
-      console.error("Error fetching channels:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <ProtectedRoute requiredRoles={["admin", "developer"]}>
@@ -46,7 +31,7 @@ export default function ChannelsPage() {
             </p>
           </div>
 
-          {loading && (
+          {/* {loading && (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             </div>
@@ -62,7 +47,7 @@ export default function ChannelsPage() {
                 Try again
               </button>
             </div>
-          )}
+          )} */}
 
           {!loading && !error && (
             <div className="bg-white shadow overflow-hidden sm:rounded-md">

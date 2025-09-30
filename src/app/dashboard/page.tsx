@@ -21,14 +21,14 @@ export default function DashboardPage() {
       color: "from-purple-400 to-purple-600",
       roles: null
     },
-    {
-      name: "Channels", 
-      description: "Manage streaming channels",
-      href: "/dashboard/channels",
-      icon: <ChannelsIcon />,
-      color: "from-blue-400 to-blue-600",
-      roles: ["admin", "developer"]
-    },
+    // {
+    //   name: "Channels", 
+    //   description: "Manage streaming channels",
+    //   href: "/dashboard/channels",
+    //   icon: <ChannelsIcon />,
+    //   color: "from-blue-400 to-blue-600",
+    //   roles: ["admin", "developer"]
+    // },
     {
       name: "Sessions",
       description: "View session details", 
@@ -37,14 +37,14 @@ export default function DashboardPage() {
       color: "from-green-400 to-green-600",
       roles: ["admin", "qa", "developer"]
     },
-    {
-      name: "Redis Data",
-      description: "QA debugging tools",
-      href: "/dashboard/redis", 
-      icon: <RedisIcon />,
-      color: "from-red-400 to-red-600",
-      roles: ["admin", "qa"]
-    }
+    // {
+    //   name: "Redis Data",
+    //   description: "QA debugging tools",
+    //   href: "/dashboard/redis", 
+    //   icon: <RedisIcon />,
+    //   color: "from-red-400 to-red-600",
+    //   roles: ["admin", "qa"]
+    // }
   ];
 
   const filteredActions = quickActions.filter((action) => {
@@ -56,15 +56,15 @@ export default function DashboardPage() {
     <ProtectedRoute>
       <DashboardLayout>
         <div className="space-y-8">
-          <div>
+          {/* <div>
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             <p className="mt-2 text-sm text-gray-600">
               Welcome to the Tunity Back Office system
             </p>
-          </div>
+          </div> */}
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white overflow-hidden shadow-lg rounded-xl border border-gray-200">
               <div className="p-6">
                 <div className="flex items-center">
@@ -130,7 +130,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Quick Actions */}
           <div>

@@ -33,9 +33,9 @@ export default function DashboardLayout({
   const navigation = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Viewer", href: "/dashboard/viewer" },
-    { name: "Channels", href: "/dashboard/channels", roles: ["admin", "developer"] },
+    // { name: "Channels", href: "/dashboard/channels", roles: ["admin", "developer"] },
     { name: "Sessions", href: "/dashboard/sessions", roles: ["admin", "qa", "developer"] },
-    { name: "Redis Data", href: "/dashboard/redis", roles: ["admin", "qa"] },
+    // { name: "Redis Data", href: "/dashboard/redis", roles: ["admin", "qa"] },
   ];
 
   const filteredNavigation = navigation.filter((item) => {
