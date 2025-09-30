@@ -10,7 +10,17 @@ export async function GET(
     // Get backend URL from environment or use default
     const backendURL = process.env.BACKEND_URL || 'http://34.29.136.15:8080';
     
-    console.log(`Proxying session logs request to: ${backendURL}/sessions/${sessionId}/logs`);
+    // Get query parameters from the original request
+    const url = new URL(request.url);
+    const searchParams = url.searchParams;
+    
+    // Build the backend URL with query parameters
+    const backendUrl = new URL(`${backendURL}/sessions/${sessionId}/logs`);
+    searchParams.forEach((value, key) => {
+      backendUrl.searchParams.append(key, value);
+    });
+    
+    console.log(`Proxying session logs request to: ${backendUrl.toString()}`);
     
     // Get authorization header from the original request
     const authHeader = request.headers.get('authorization');
@@ -23,7 +33,7 @@ export async function GET(
     }
     
     // Make the request to your backend from the server side (avoids mixed content)
-    const response = await fetch(`${backendURL}/sessions/${sessionId}/logs`, {
+    const response = await fetch(backendUrl.toString(), {
       method: 'GET',
       headers,
     });
