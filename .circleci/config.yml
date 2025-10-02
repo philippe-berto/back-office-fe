@@ -28,7 +28,6 @@ jobs:
           dockerfile: "build/Dockerfile"
           image: "ops/back-office-fe"
           tag: "0.0.$CIRCLE_BUILD_NUM"
-          extra_build_args: --build-arg="GITHUB_TOKEN=$GITHUB_TOKEN"
           registry-url: us-central1-docker.pkg.dev
           repository: "tunity"
       - gcr/push-image:
