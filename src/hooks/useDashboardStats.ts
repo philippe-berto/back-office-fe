@@ -16,16 +16,6 @@ export function useDashboardStats(refreshInterval: number = 30000) {
     try {
       setStats(prev => ({ ...prev, loading: true, error: null }));
       
-      // For now, using mock data since API endpoints might not be ready
-      // In production, uncomment the following lines:
-      // const dashboardStats = await apiClient.getDashboardStats();
-      // setStats({
-      //   onlineChannels: dashboardStats.onlineChannels,
-      //   sessionsLastHour: dashboardStats.sessionsLastHour,
-      //   loading: false,
-      //   error: null
-      // });
-
       // Mock data with simulated API delay
       await new Promise(resolve => setTimeout(resolve, 800));
       

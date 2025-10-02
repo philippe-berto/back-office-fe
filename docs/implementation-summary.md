@@ -86,7 +86,7 @@ The frontend is ready to connect to your backend API with these endpoints:
 - `GET /api/channels` - Channel list
 - `GET /api/sessions` - Session list
 - `GET /api/sessions/:id` - Session details
-- `GET /api/sessions/:id/videos` - Session videos
+- `GET /api/sessions/:id/frames` - Session frames
 - `GET /api/redis/:key` - Redis data fetching
 
 ### 🚀 Getting Started

@@ -87,7 +87,7 @@ The frontend communicates with the backend through the following endpoints:
 - `GET /api/channels` - Get channel configurations
 - `GET /api/sessions` - Get session list
 - `GET /api/sessions/:id` - Get session details
-- `GET /api/sessions/:id/videos` - Get session videos
+- `GET /api/sessions/:id/frames` - Get session frames
 - `GET /api/redis/:key` - Fetch Redis data for debugging
 
 ## Build and Deploy

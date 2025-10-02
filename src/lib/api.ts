@@ -28,7 +28,7 @@ class ApiClient {
     return response.json();
   }
 
-  // Authentication methods - uses local proxy to avoid mixed content
+  // Authentication methods - call backend directly via HTTPS
   async validateGoogleToken(token: string): Promise<{
     success: boolean;
     user?: {
@@ -39,8 +39,8 @@ class ApiClient {
     };
     message?: string;
   }> {
-    // Use local Next.js API route proxy to avoid mixed content issues
-    const response = await fetch("/api/auth/validate", {
+    // Call backend directly via HTTPS
+    const response = await fetch(`${this.baseURL}/auth/validate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -57,9 +57,9 @@ class ApiClient {
     return response.json();
   }
 
-  // Example API methods - use proxy endpoints to avoid mixed content
+  // Channel API methods - call backend directly via HTTPS
   async getChannels() {
-    const response = await fetch("/api/channels", {
+    const response = await fetch(`${this.baseURL}/api/channels`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -75,46 +75,8 @@ class ApiClient {
     return response.json();
   }
 
-  // Dashboard stats methods - use proxy endpoints to avoid mixed content
-  async getDashboardStats(): Promise<{
-    onlineChannels: number;
-    sessionsLastHour: number;
-  }> {
-    const response = await fetch("/api/dashboard/stats", {
-      headers: {
-        "Content-Type": "application/json",
-        ...this.getAuthHeaders(),
-      },
-    });
-
-    if (response.status === 401) {
-      clearAuth();
-      window.location.href = "/login";
-      return { onlineChannels: 0, sessionsLastHour: 0 };
-    }
-
-    return response.json();
-  }
-
   async getOnlineChannelsCount(): Promise<{ count: number }> {
-    const response = await fetch("/api/channels/online/count", {
-      headers: {
-        "Content-Type": "application/json",
-        ...this.getAuthHeaders(),
-      },
-    });
-
-    if (response.status === 401) {
-      clearAuth();
-      window.location.href = "/login";
-      return { count: 0 };
-    }
-
-    return response.json();
-  }
-
-  async getSessionsLastHour(): Promise<{ count: number }> {
-    const response = await fetch("/api/sessions/last-hour/count", {
+    const response = await fetch(`${this.baseURL}/api/channels/online/count`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -173,8 +135,8 @@ class ApiClient {
   // END HARDCODED RESPONSES
 
   async getSessionDetails(sessionId: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/sessions/${sessionId}`, {
+    // Call backend directly via HTTPS
+    const response = await fetch(`${this.baseURL}/sessions/${sessionId}`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -199,8 +161,8 @@ class ApiClient {
   }
 
   async getSessionById(sessionId: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/sessions/${sessionId}`, {
+    // Call backend directly via HTTPS
+    const response = await fetch(`${this.baseURL}/sessions/${sessionId}`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -227,27 +189,9 @@ class ApiClient {
     return response.json();
   }
 
-  async getSessionVideos(sessionId: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/sessions/${sessionId}/videos`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...this.getAuthHeaders(),
-      },
-    });
-
-    if (response.status === 401) {
-      clearAuth();
-      window.location.href = "/login";
-      return;
-    }
-
-    return response.json();
-  }
-
   async getRedisData(key: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/redis/${key}`, {
+    // Call backend directly via HTTPS
+    const response = await fetch(`${this.baseURL}/api/redis/${key}`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),
@@ -264,8 +208,8 @@ class ApiClient {
   }
 
   async getSessionLogs(sessionId: string, startTime: string, endTime?: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const url = new URL(`/api/sessions/${sessionId}/logs`, window.location.origin);
+    // Call backend directly via HTTPS
+    const url = new URL(`${this.baseURL}/sessions/${sessionId}/logs`);
     
     // If endTime is not provided, set it to one hour after startTime
     const finalEndTime = endTime || (() => {
@@ -294,8 +238,8 @@ class ApiClient {
   }
 
   async getSessionFrames(sessionId: string) {
-    // Use proxy endpoint to avoid mixed content issues
-    const response = await fetch(`/api/sessions/${sessionId}/frames`, {
+    // Call backend directly via HTTPS
+    const response = await fetch(`${this.baseURL}/sessions/${sessionId}/frames`, {
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeaders(),

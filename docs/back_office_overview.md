@@ -276,13 +276,13 @@ export default function ProtectedRoute({
 
 - `GET /api/channels` - Get channel configurations
 - `GET /api/sessions` - Get session details
-- `GET /api/sessions/:id/videos` - Get session videos
+- `GET /api/sessions/:id/frames` - Get session frames
 - `GET /api/redis/:key` - Fetch data from Redis for QA
 
 ## User Roles & Permissions
 
 - **admin**: Full access to all resources
-- **qa**: Access to sessions, videos, and Redis data
+- **qa**: Access to sessions, frames, and Redis data
 - **developer**: Access to channels and sessions
 - **viewer**: Read-only access to basic resources
 

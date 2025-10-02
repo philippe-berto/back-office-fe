@@ -16,10 +16,10 @@ interface SessionDetail {
   metadata?: Record<string, any>;
 }
 
-interface Video {
+interface Frame {
   id: string;
   filename: string;
-  duration: number;
+  timestamp: string;
   size: number;
   created_at: string;
 }
@@ -29,7 +29,7 @@ export default function SessionDetailPage() {
   const sessionId = params.id as string;
   
   const [session, setSession] = useState<SessionDetail | null>(null);
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [frames, setFrames] = useState<Frame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,13 +42,13 @@ export default function SessionDetailPage() {
   const fetchSessionData = async () => {
     try {
       setLoading(true);
-      const [sessionData, videosData] = await Promise.all([
+      const [sessionData, framesData] = await Promise.all([
         apiClient.getSessionDetails(sessionId),
-        apiClient.getSessionVideos(sessionId)
+        apiClient.getSessionFrames(sessionId)
       ]);
       
       setSession(sessionData.session);
-      setVideos(videosData.videos || []);
+      setFrames(framesData.frames || []);
     } catch (err) {
       setError("Failed to fetch session data");
       console.error("Error fetching session data:", err);
@@ -62,17 +62,6 @@ export default function SessionDetailPage() {
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -102,7 +91,7 @@ export default function SessionDetailPage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">{session.name}</h1>
                 <p className="mt-2 text-sm text-gray-600">
-                  Session details and associated videos
+                  Session details and associated frames
                 </p>
               </div>
 
@@ -150,21 +139,21 @@ export default function SessionDetailPage() {
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Video Count</dt>
-                      <dd className="mt-1 text-sm text-gray-900">{videos.length}</dd>
+                      <dt className="text-sm font-medium text-gray-500">Frame Count</dt>
+                      <dd className="mt-1 text-sm text-gray-900">{frames.length}</dd>
                     </div>
                   </dl>
                 </div>
               </div>
 
-              {/* Videos */}
+              {/* Frames */}
               <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    Associated Videos
+                    Associated Frames
                   </h3>
-                  {videos.length === 0 ? (
-                    <p className="text-gray-500">No videos found for this session</p>
+                  {frames.length === 0 ? (
+                    <p className="text-gray-500">No frames found for this session</p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -174,7 +163,7 @@ export default function SessionDetailPage() {
                               Filename
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Duration
+                              Timestamp
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Size
@@ -185,19 +174,19 @@ export default function SessionDetailPage() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {videos.map((video) => (
-                            <tr key={video.id}>
+                          {frames.map((frame) => (
+                            <tr key={frame.id}>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {video.filename}
+                                {frame.filename}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {formatDuration(video.duration)}
+                                {frame.timestamp}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {formatFileSize(video.size)}
+                                {formatFileSize(frame.size)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {new Date(video.created_at).toLocaleString()}
+                                {new Date(frame.created_at).toLocaleString()}
                               </td>
                             </tr>
                           ))}
