@@ -1,0 +1,74 @@
+version: 2.1
+
+orbs:
+  gcr: circleci/gcp-gcr@0.16.10
+
+executors:
+  base-executor:
+    docker:
+      - image: cimg/go:1.23.12
+    resource_class: medium
+jobs:
+  build:
+    parallelism: 1
+    executor: base-executor
+    steps:
+      - checkout
+      - run: mkdir tmp
+      - run: echo "0.0.${CIRCLE_BUILD_NUM}" >> tmp/build-version
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - build-version
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - gcr/gcr-auth:
+          registry-url: us-central1-docker.pkg.dev
+      - gcr/build-image:
+          dockerfile: "build/Dockerfile"
+          image: "ops/back-office-fe"
+          tag: "0.0.$CIRCLE_BUILD_NUM"
+          extra_build_args: --build-arg="GITHUB_TOKEN=$GITHUB_TOKEN"
+          registry-url: us-central1-docker.pkg.dev
+          repository: "tunity"
+      - gcr/push-image:
+          image: "ops/back-office-fe"
+          tag: "0.0.$CIRCLE_BUILD_NUM"
+          registry-url: us-central1-docker.pkg.dev
+          repository: "tunity"
+  deploy-dev:
+    executor: base-executor
+    steps:
+      - checkout
+      - attach_workspace:
+          at: tmp
+      - run: echo "export BUILD_NUM=$(cat tmp/build-version)" >> "$BASH_ENV"
+      - run: curl -X POST https://circleci.com/api/v2/project/gh/AudioStreamTV/tunity-iac/pipeline --header "Circle-Token:$CICD_TOKEN" --header "Content-Type:application/json" --header "Accept:application/json" -d '{"parameters":{"deploy-dev":true,"image-tag":"'$BUILD_NUM'","repo-name":"'$CIRCLE_PROJECT_REPONAME'"}}'
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      # - lint:
+      #     context:
+      #       - tunity-dev
+      # - test:
+      #     context:
+      #       - tunity-dev
+      - build:
+          context:
+            - tunity-dev
+          # requires:
+          #   - lint
+          #   - test
+          # filters:
+          #   branches:
+          #     only: main
+      # - deploy-dev:
+      #     context:
+      #       - tunity-dev
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: main
